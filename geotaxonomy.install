@@ -103,7 +103,6 @@ function geotaxonomy_uninstall() {
 
 function geotaxonomy_update_1() {
   drupal_install_schema('geotaxonomy');
-  return array();
 }
 
 function geotaxonomy_update_2() {
@@ -124,7 +123,6 @@ function geotaxonomy_update_2() {
     $new_field['description'] = $desc;
     db_add_field($ret, 'term_geo', $key, $new_field);
   }
-  return $ret;
 }
 
 /**
@@ -142,7 +140,6 @@ function geotaxonomy_update_6001() {
     db_add_field($ret, 'term_geo', $name, $fields[$name]);
     db_add_index($ret, 'term_geo', $name, $indexes[$name]);
   }
-  return $ret;
 }
 
 /**
@@ -158,8 +155,6 @@ function geotaxonomy_update_6002() {
     variable_del("geotaxonomy_$voc->vid");
   }
   variable_set('geotaxonomy_vocabularies', $vocabulary_settings);
-  
-  return array();
 }
 
 /**
@@ -172,5 +167,4 @@ function geotaxonomy_update_6003() {
     'description' => 'Geometry.',
   );
   db_add_field($ret, 'term_geo', 'geometry', $geometry);
-  return $ret;
 }
