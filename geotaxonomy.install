@@ -9,7 +9,7 @@
  * Implementation of hook_schema().
  */
 function geotaxonomy_schema() {
-  $schema['term_geo'] = array(
+  $schema['taxonomy_term_geo'] = array(
     'description' => 'Taxonomy term geo data.',
     'fields' => array(
       'tid' => array(
@@ -121,7 +121,7 @@ function geotaxonomy_update_2() {
 
   foreach ($fields as $key => $desc) {
     $new_field['description'] = $desc;
-    db_add_field($ret, 'term_geo', $key, $new_field);
+    db_add_field($ret, 'taxonomy_term_geo', $key, $new_field);
   }
 }
 
@@ -132,13 +132,13 @@ function geotaxonomy_update_2() {
  */
 function geotaxonomy_update_6001() {
   $schema = geotaxonomy_schema();
-  $fields = $schema['term_geo']['fields'];
-  $indexes = $schema['term_geo']['indexes'];
+  $fields = $schema['taxonomy_term_geo']['fields'];
+  $indexes = $schema['taxonomy_term_geo']['indexes'];
 
   $ret = array();
   foreach (array('parent_name', 'external_id', 'parent_external_id') as $name) {
-    db_add_field($ret, 'term_geo', $name, $fields[$name]);
-    db_add_index($ret, 'term_geo', $name, $indexes[$name]);
+    db_add_field($ret, 'taxonomy_term_geo', $name, $fields[$name]);
+    db_add_index($ret, 'taxonomy_term_geo', $name, $indexes[$name]);
   }
 }
 
@@ -166,5 +166,5 @@ function geotaxonomy_update_6003() {
     'type' => 'text',
     'description' => 'Geometry.',
   );
-  db_add_field($ret, 'term_geo', 'geometry', $geometry);
+  db_add_field($ret, 'taxonomy_term_geo', 'geometry', $geometry);
 }

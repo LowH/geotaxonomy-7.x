@@ -139,7 +139,7 @@ function geotaxonomy_views_api() {
  * Little API helper function to retrieve geo data for a given term.
  */
 function geotaxonomy_get_term($tid) {
-  return db_fetch_array(db_query("SELECT lat, lon, bound_top, bound_right, bound_bottom, bound_left, geometry FROM {term_geo} WHERE tid = %d", $tid));
+  return db_fetch_array(db_query("SELECT lat, lon, bound_top, bound_right, bound_bottom, bound_left, geometry FROM {taxonomy_term_geo} WHERE tid = %d", $tid));
 }
 
 /**
@@ -149,10 +149,10 @@ function geotaxonomy_taxonomy($op = NULL, $type = NULL, $term = NULL){
   if ($type =='term' && $term && _geotaxonomy_vocabulary_enabled($term['vid'])) {
     switch ($op) {
       case 'delete':
-        db_query("DELETE FROM {term_geo} WHERE tid = %d", $term['tid']);
+        db_query("DELETE FROM {taxonomy_term_geo} WHERE tid = %d", $term['tid']);
         break;
       case 'update':
-        db_query("DELETE FROM {term_geo} WHERE tid = %d", $term['tid']);
+        db_query("DELETE FROM {taxonomy_term_geo} WHERE tid = %d", $term['tid']);
       case 'insert':
         geotaxonomy_write_record($term);
         break;
@@ -176,7 +176,7 @@ function geotaxonomy_write_record($term){
     }
   }
   if (!$empty_record) {
-    drupal_write_record('term_geo', $term);
+    drupal_write_record('taxonomy_term_geo', $term);
   }
 }
 
@@ -187,7 +187,7 @@ function geotaxonomy_rebuild_hierarchy($vid) {
 
   // First pull all terms from this vocabulary.
   // @todo: rather rebuild with multiple queries?
-  $result = db_query('SELECT td.tid, td.name, tg.parent_name, tg.external_id, tg.parent_external_id FROM {term_data} td JOIN {term_geo} tg ON td.tid = tg.tid WHERE td.vid = %d', $vid);
+  $result = db_query('SELECT td.tid, td.name, tg.parent_name, tg.external_id, tg.parent_external_id FROM {taxonomy_term_data} td JOIN {taxonomy_term_geo} tg ON td.tid = tg.tid WHERE td.vid = %d', $vid);
   $terms_by_name = $terms_by_external = array();
   while ($term = db_fetch_object($result)) {
     $terms_by_name[$term->name] = $term;
@@ -199,11 +199,11 @@ function geotaxonomy_rebuild_hierarchy($vid) {
   foreach ($terms_by_name as $term) {
     if (!empty($term->parent_external_id)) {
       $parent_tid = empty($terms_by_external[$term->parent_external_id]->tid) ? 0 : $terms_by_external[$term->parent_external_id]->tid;
-      db_query('UPDATE {term_hierarchy} SET parent = %d WHERE tid = %d', $parent_tid, $term->tid);
+      db_query('UPDATE {taxonomy_term_hierarchy} SET parent = %d WHERE tid = %d', $parent_tid, $term->tid);
     }
     if (!empty($term->parent_name)) {
       $parent_tid = empty($terms_by_name[$term->parent_name]->tid) ? 0 : $terms_by_name[$term->parent_name]->tid;
-      db_query('UPDATE {term_hierarchy} SET parent = %d WHERE tid = %d', $parent_tid, $term->tid);
+      db_query('UPDATE {taxonomy_term_hierarchy} SET parent = %d WHERE tid = %d', $parent_tid, $term->tid);
     }
   }
 }
@@ -364,7 +364,7 @@ function _geotaxonomy_save($feed_item, $feed_nid, $settings = array()) {
         'description' => $feed_item['term_description'],
         'weight' => $feed_item['term_weight'],
         );
-      if (drupal_write_record('term_data', $term)) {
+      if (drupal_write_record('taxonomy_term_data', $term)) {
         _geotaxonomy_item_tid((!empty($feed_item['term_unique']) ? $feed_item['term_unique'] : $feed_item['term_name'] . crc32(serialize($feed_item))), $term['tid']);
         if (is_numeric($feed_item['term_lat']) || is_numeric($feed_item['term_lon'])) {
           $term_geo = array(
