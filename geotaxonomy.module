@@ -98,7 +98,7 @@ function geotaxonomy_form_taxonomy_form_term_alter(&$form, &$form_state) {
 
   // Helper map for lat/lon if OpenLayers UI is available.
   if (module_exists('openlayers_ui')) {
-    drupal_add_js(drupal_get_path('module', 'geotaxonomy') .'/js/geotaxonomy.admin.js', 'module');
+    drupal_add_js(drupal_get_path('module', 'geotaxonomy') .'/js/geotaxonomy.admin.js');
 
     $default_preset = openlayers_preset_load(variable_get('openlayers_default_preset', 'default'));
     $defaults = $default_preset->data;
