@@ -412,7 +412,7 @@ function _geotaxonomy_delete($feed_item, $feed_nid) {
     if (isset($feed_item['term_name'])) {
       $tid = db_result(db_query("SELECT tid FROM {term_data} WHERE vid = %d AND name = '%s'", $feed_node->feed->settings['processors']['geotaxonomy']['vocabulary'], $feed_item['term_name']));
       if($tid) {
-        taxonomy_del_term($tid);
+        taxonomy_term_delete($tid);
       }
     }
   }
@@ -425,7 +425,7 @@ function _geotaxonomy_purge($feed) {
   $feed_node = node_load($feed->nid);
   $result = db_query('SELECT tid FROM {term_data} WHERE vid = %d', $feed_node->feed->settings['processors']['geotaxonomy']['vocabulary']);
   while ($term = db_fetch_object($result)) {
-    taxonomy_del_term($term->tid);
+    taxonomy_term_delete($term->tid);
   }
 
   cache_clear_all();
