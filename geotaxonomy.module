@@ -410,7 +410,7 @@ function _geotaxonomy_delete($feed_item, $feed_nid) {
   $feed_node = node_load($feed_nid);
   if ($feed_item = feedapi_mapper_map($feed_node, 'geotaxonomy', $feed_item)) {
     if (isset($feed_item['term_name'])) {
-      $tid = db_result(db_query("SELECT tid FROM {term_data} WHERE vid = %d AND name = '%s'", $feed_node->feed->settings['processors']['geotaxonomy']['vocabulary'], $feed_item['term_name']));
+      $tid = db_result(db_query("SELECT tid FROM {taxonomy_term_data} WHERE vid = %d AND name = '%s'", $feed_node->feed->settings['processors']['geotaxonomy']['vocabulary'], $feed_item['term_name']));
       if($tid) {
         taxonomy_term_delete($tid);
       }
@@ -423,7 +423,7 @@ function _geotaxonomy_delete($feed_item, $feed_nid) {
  */
 function _geotaxonomy_purge($feed) {
   $feed_node = node_load($feed->nid);
-  $result = db_query('SELECT tid FROM {term_data} WHERE vid = %d', $feed_node->feed->settings['processors']['geotaxonomy']['vocabulary']);
+  $result = db_query('SELECT tid FROM {taxonomy_term_data} WHERE vid = %d', $feed_node->feed->settings['processors']['geotaxonomy']['vocabulary']);
   while ($term = db_fetch_object($result)) {
     taxonomy_term_delete($term->tid);
   }
@@ -448,9 +448,9 @@ function _geotaxonomy_unique($feed_item, $feed_nid, $settings) {
   if ($feed_item = feedapi_mapper_map($feed_node, 'geotaxonomy', $feed_item)) {
     if (isset($feed_item['term_name'])) {
       if (!empty($feed_item['term_parent_name'])) {
-        $tid = db_result(db_query("SELECT td.tid FROM {term_data} td LEFT JOIN {term_hierarchy} th ON td.tid = th.tid LEFT JOIN {term_data} td2 ON td2.tid = th.parent WHERE td.vid = %d AND td.name = '%s' AND td2.name = '%s'", $feed_node->feed->settings['processors']['geotaxonomy']['vocabulary'], $feed_item['term_name'], $feed_item['term_parent_name']));
+        $tid = db_result(db_query("SELECT td.tid FROM {taxonomy_term_data} td LEFT JOIN {taxonomy_term_hierarchy} th ON td.tid = th.tid LEFT JOIN {taxonomy_term_data} td2 ON td2.tid = th.parent WHERE td.vid = %d AND td.name = '%s' AND td2.name = '%s'", $feed_node->feed->settings['processors']['geotaxonomy']['vocabulary'], $feed_item['term_name'], $feed_item['term_parent_name']));
       } else {
-        $tid = db_result(db_query("SELECT td.tid FROM {term_data} td LEFT JOIN {term_hierarchy} th ON td.tid = th.tid WHERE td.vid = %d AND td.name = '%s' AND th.parent = 0", $feed_node->feed->settings['processors']['geotaxonomy']['vocabulary'], $feed_item['term_name']));
+        $tid = db_result(db_query("SELECT td.tid FROM {taxonomy_term_data} td LEFT JOIN {taxonomy_term_hierarchy} th ON td.tid = th.tid WHERE td.vid = %d AND td.name = '%s' AND th.parent = 0", $feed_node->feed->settings['processors']['geotaxonomy']['vocabulary'], $feed_item['term_name']));
       }
       if ($tid) {
         return $tid;
@@ -490,12 +490,12 @@ function geotaxonomy_feedapi_after_refresh($feed) {
             }
             if (!$ptid && isset($feed_item['term_parent_name'])) {
               // Just find parent by name.
-              $ptid = db_result(db_query("SELECT tid FROM {term_data} WHERE vid = %d AND name = '%s'", $feed_node->feed->settings['processors']['geotaxonomy']['vocabulary'], $feed_item['term_parent_name']));
+              $ptid = db_result(db_query("SELECT tid FROM {taxonomy_term_data} WHERE vid = %d AND name = '%s'", $feed_node->feed->settings['processors']['geotaxonomy']['vocabulary'], $feed_item['term_parent_name']));
             }
             $hierarchy['parent'] = $ptid ? $ptid : 0;
 
             // Don't attempt to write a record if an identical hierarchy entry exists.
-            $exists = db_result(db_query("SELECT tid FROM {term_hierarchy} WHERE tid = %d AND parent = %d", $hierarchy['tid'], $hierarchy['parent']));
+            $exists = db_result(db_query("SELECT tid FROM {taxonomy_term_hierarchy} WHERE tid = %d AND parent = %d", $hierarchy['tid'], $hierarchy['parent']));
             if (!$exists) {
               drupal_write_record('term_hierarchy', $hierarchy);
             }

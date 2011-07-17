@@ -30,23 +30,23 @@ class geotaxonomy_handler_field_term_node_count extends views_handler_field {
     $theterm = 'total_term_nodes_tid';
     $this->query->add_field($this->table_alias, $this->real_field, $theterm);
 
-    $subquery = "\n  SELECT COUNT(DISTINCT tn.nid) FROM {term_node} tn\n";
+    $subquery = "\n  SELECT COUNT(DISTINCT tn.nid) FROM {taxonomy_term_node} tn\n";
     $where = "  WHERE tn.tid = $theterm\n";
     $last = "tn";
 
     // Largely copied from views_handler_argument_term_node_tid_depth.
     if ($this->options['depth'] > 0) {
-      $subquery .= "    LEFT JOIN {term_hierarchy} th ON th.tid = tn.tid\n";
+      $subquery .= "    LEFT JOIN {taxonomy_term_hierarchy} th ON th.tid = tn.tid\n";
       $last = "th";
       foreach (range(1, abs($this->options['depth'])) as $count) {
-        $subquery .= "    LEFT JOIN {term_hierarchy} th$count ON $last.parent = th$count.tid\n";
+        $subquery .= "    LEFT JOIN {taxonomy_term_hierarchy} th$count ON $last.parent = th$count.tid\n";
         $where .= "    OR th$count.tid = $theterm\n";
         $last = "th$count";
       }
     }
     else if ($this->options['depth'] < 0) {
       foreach (range(1, abs($this->options['depth'])) as $count) {
-        $subquery .= "    LEFT JOIN {term_hierarchy} th$count ON $last.tid = th$count.parent\n";
+        $subquery .= "    LEFT JOIN {taxonomy_term_hierarchy} th$count ON $last.tid = th$count.parent\n";
         $where .= "    OR th$count.tid = $theterm\n";
         $last = "th$count";
       }
